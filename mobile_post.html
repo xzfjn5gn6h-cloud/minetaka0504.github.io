@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>投稿画面</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<style>
+
+  body{
+    display: flex;
+    justify-content: center;
+  }
+
+  /* 投稿画面全体 */
+  .posts {
+    margin-top: 20px;
+  }
+
+  .post {
+    border: 2px solid #333;
+    background: white;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+
+  .image-box {
+    height: 300px;
+    background: #eee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 50px;
+  }
+
+  .post-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+
+  .image-box {
+    height: 500px;
+    background: #eee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;  
+  }
+
+  .image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+  }
+
+  /* 投稿フォーム */
+  .post-form {
+    max-width: 700px;
+    margin-top: 20px;
+  }
+
+  /* 画像アップロード枠 */
+  .upload-box {
+    display: block;
+    border: 2px solid #333;
+    height: 300px;
+    cursor: pointer;
+    margin-bottom: 20px;
+  }
+
+  .upload-inner {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #666;
+    font-size: 20px;
+  }
+
+  /* 入力欄 */
+  .input-text {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+
+  .textarea {
+    width: 100%;
+    height: 120px;
+    padding: 10px;
+    font-size: 16px;
+    resize: none;
+    margin-bottom: 20px;
+  }
+
+  /* 投稿ボタン */
+  .submit-btn {
+    margin-left: auto;
+    display: block;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  a{
+    border: 2px solid #000;
+    background-color: #ddda;
+    padding: 10px 20px;
+    margin: 30px 0 0 0;
+    text-decoration: none;
+  }
+
+</style>
+
+<body>
+  <!-- メイン -->
+  <section class="main">
+
+    <h2>投稿</h2>
+
+  <form class="post-form" action="{{ url_for('create_post') }}" method="POST" enctype="multipart/form-data">
+
+      <!-- 画像選択 -->
+      <label class="upload-box">
+        <input type="file" name="image" hidden required>
+        <div class="upload-inner">
+          📷<br>
+          <span>画像を選択</span>
+        </div>
+      </label>
+
+      <!-- タイトル -->
+      <input
+        type="text"
+        name="title"
+        placeholder="タイトルを入力..."
+        class="input-text"
+        required
+      >
+
+      <!-- コメント -->
+      <textarea
+        name="comment"
+        placeholder="コメントを入力..."
+        class="textarea"
+        required
+      ></textarea>
+
+      <!-- 投稿ボタン -->
+      <button type="submit" class="submit-btn">
+        ✈ 投稿する
+      </button>
+
+    </form>
+
+    <a href="/mobile/profile">プロフィール</a>
+
+  </section>
+</body>
+
+<script>
+  const fileInput = document.querySelector('input[name="image"]');
+  const uploadInner = document.querySelector('.upload-inner');
+
+  fileInput.addEventListener("change", function () {
+    const file = this.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        uploadInner.innerHTML =
+          '<img src="' + e.target.result + '" style="width:100%; height:100%; object-fit:cover;">';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+</script>
+

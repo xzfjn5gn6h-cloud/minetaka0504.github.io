@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プロフィール画面</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  </head>
+
+  <style>
+
+  /* コンテンツ */
+  .content {
+    width: 90%;
+    flex: 1;
+    padding: 30px;
+    background-color: #fff7;
+      z-index: 1;
+      position: relative;
+  }
+
+  /* プロフィール上部 */
+  .profile-header {
+    display: block;
+    padding: 0 0 5px 0;
+    align-items: flex-end;
+    gap: 20px;
+    border-bottom: 2px solid #000;
+  }
+  .user_info {
+    display: flex;
+    align-items: center;
+  }
+
+  .icon-wrapper {
+    margin: 0 0 0 10px;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    overflow: hidden;      
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #000;
+  }
+
+  label[for="iconUpload"] {
+    width: 90px;
+    height: 90px;
+  }
+
+  .user-profile{
+    display: block;
+    margin-left: 20px;
+  }
+
+  .avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center;
+    cursor: pointer;
+    transition: 0.2s ease;
+    background: #f0f0f0;
+    opacity: 1;
+  }
+  .editable:hover {
+    opacity: 0.7;
+    transform: scale(1.05);
+    cursor: pointer;
+  }
+
+
+  .editable-bio{
+    width: 55vw;
+    font-size: 14px;
+    opacity: 1;
+     transition: 0.2s ease;
+  }
+  .editable-bio:hover {
+    opacity: 0.6;
+    cursor: pointer;
+  }
+
+  .stats span {
+    font-size: 14px;
+    margin-right: 10px;
+  }
+
+  .follow-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    background: #0095f6;
+    color: white;
+    font-weight: bold;
+  }
+  .follow-btn:hover {
+    opacity: 0.8;
+  }
+
+  /* フォローしている人を表示 */
+  .follow-toggle {
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .stat-item {
+    display: inline-block;
+    margin-right: 20px;
+    position: relative;
+  }
+
+  .follow-dropdown {
+    position: absolute;
+    top: 20px;
+    right: -80px;
+    background: white;
+    border: 1px solid #ccc;
+    width: 200px;
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 10px;
+    margin-top: 8px;
+    display: none;
+    border-radius: 10px;
+  }
+
+  .follow-user {
+    padding: 6px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  .follow-user:hover {
+    background: #f0f0f0;
+  }
+
+  /* バッジの表示エリア */
+  .badge-area {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 10px 0 10px 0;
+    padding: 0 0 10px 0;
+    gap: 15px;
+    border-bottom: 2px solid #000;
+  }
+
+  .badge-item {
+    margin: 0 0 0 20px;
+    text-align: center;
+  }
+
+  .badge-img {
+    width: 80px;
+    height: auto;
+  }
+
+  /* 自分の投稿 */
+  .post-grid {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .profile-posts {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .post-card {
+    width: 48%;
+    height: auto;
+    border: 2px solid #000;
+    margin: 0 5px 20px 0;
+    padding: 10px;
+    aspect-ratio: 1 / 1;  
+    overflow: hidden;
+    border-radius: 15px;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+  }
+
+
+  .post-img {
+    width: 100%;
+    height: 80%;
+    object-fit: cover;
+    transition: 0.3s;
+  }
+  .post-img:hover {
+    transform: scale(1.05);
+  }
+
+  .tag {
+    font-size: 12px;
+    border: 1px solid #000;
+    padding: 2px 6px;
+  }
+
+  .toko {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+  }
+
+  .title {
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .likes {
+    font-size: 14px;
+  }
+
+  .image-modal {
+    display: flex;
+    position: fixed;
+    z-index: 99;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    color: #fff;
+    background-color: rgba(0,0,0,0);
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: background 0.3s ease, opacity 0.3s ease;
+  }
+
+  .image-modal.active {
+    background: rgba(0,0,0,0.8);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .image-modal-content {
+    max-width: 800px;
+    width: 90%;
+    text-align: center;
+    transform: scale(0.8);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .image-modal.active .image-modal-content {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .image-modal-content img {
+    width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    border-radius: 12px;
+  }
+
+  .close-btn {
+    position: absolute;
+    right: -50px;
+    top: -20px;
+    font-size: 80px;
+    color: rgb(255, 255, 255);
+    cursor: pointer;
+    z-index: 10;
+  }
+
+  .empty-box {
+    width: 100%;
+    height: 350px;
+    border: 4px solid #000;
+    border-radius: 15px;
+    background-color: #fff;
+    text-align: center;
+    cursor: pointer;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    transition: 0.3s;
+  }
+
+  .empty-box:hover {
+    transform: scale(1.02);
+    background: #fdfefe;
+  }
+
+  .plus-box {
+    font-size: 60px;
+    border: 3px solid #777;
+    border-radius: 15px;
+    padding: 10px 30px;
+    margin: 20px 0;
+  }
+
+    a{
+    border: 2px solid #000;
+    background-color: #ddda;
+    padding: 10px 20px;
+    margin: 30px 0 0 0;
+    text-decoration: none;
+  }
+
+  @media (max-width: 600px) {
+
+.profile-container{
+  width: 95%;
+  margin: auto;
+}
+
+.user-info{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.badge-grid{
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 10px;
+}
+
+.badge img{
+  width:80px;
+  height:auto;
+}
+
+}
+
+  </style>
+  </head>
+
+  <body>
+
+  <div class="layout">
+
+
+
+    <!-- 右コンテンツ -->
+    <main class="content">
+
+      <section class="profile-header">
+        <div class="user_info">
+            <div class="icon-wrapper">
+                <label for="iconUpload">
+                <img id="userIcon"
+                    src="{% if user.icon_path %}
+                            {{ url_for('static', filename=user.icon_path) }}
+                        {% else %}
+                            {{ url_for('static', filename='images/default_icon.png') }}
+                        {% endif %}"
+                    class="avatar editable">
+                </label>
+                <input type="file" id="iconUpload" accept="image/*" hidden>
+            </div>
+            <div class="user-profile">
+            <h3>ユーザーネーム：{{ user.user_id }}</h3>
+            <p id="bioText"
+                class="editable-bio"
+                data-full="{{ user.bio or '' }}">
+            </p>
+            </div>
+        </div>
+        <div class="stats">
+
+          投稿数：{{ post_count }}　
+
+          <div class="stat-item">
+            フォロワー：
+            <span id="followerToggle" class="follow-toggle">
+              {{ follower_count }}
+            </span>
+            <div id="followersDropdown" class="follow-dropdown"></div>
+          </div>
+
+          <div class="stat-item">
+            フォロー：
+            <span id="followToggle" class="follow-toggle">
+              {{ following_count }}
+            </span>
+            <div id="followsDropdown" class="follow-dropdown"></div>
+          </div>
+
+        </div>
+        {% if session.get("user_id") and session.get("user_id") != user.id %}
+          <button id="followBtn"
+                  data-user-id="{{ user.id }}"
+                  class="follow-btn">
+              {% if is_following %}
+                  フォロー中
+              {% else %}
+                  フォロー
+              {% endif %}
+          </button>
+        {% endif %}
+      </section>
+
+      <section>
+        <h3>獲得バッジ</h3>
+        <div class="badge-area">
+          {% if badges %}
+            {% for badge in badges %}
+              <div class="badge-item">
+                <img src="{{ url_for('static', filename=badge.image_path) }}" 
+                    alt="{{ badge.badge_name }}" 
+                    class="badge-img">
+                <p>{{ badge.badge_name }}</p>
+                <small>{{ badge.theme_name }}</small>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p>まだバッジはありません</p>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="post-grid">
+        {% if posts and posts|length > 0 %}
+          <div class="profile-posts">
+            {% for post in posts %}
+            <div class="post-card">
+
+                {% if post.image_path %}
+                <img src="{{ url_for('static', filename=post.image_path) }}" class="post-img"  data-title="{{ post.title }}" data-likes="{{ post.fake_likes }}">
+                {% endif %}
+
+                <div class="toko">
+                  <p class="title">{{ post.title }}</p>
+                  <span class="likes">❤️ {{ post.fake_likes }}</span>
+                </div>
+
+            </div>
+            {% endfor %}
+          </div>
+          
+          {% else %}
+        <!-- 投稿が0件のとき -->
+        <div class="empty-box" onclick="location.href='{{ url_for('mobile_post') }}'">
+          <h2>投稿して世界と繋がろう</h2>
+          <div class="plus-box">＋</div>
+          <p>画像を投稿する</p>
+        </div>
+
+    {% endif %}
+
+        <a href="/mobile/post">投稿する</a>
+        <a href="/mobile/login">ログアウト</a>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- 投稿モーダルで大きく表示 -->
+  <div id="imageModal" class="image-modal">
+    <div class="image-modal-content">
+      <span class="close-btn">&times;</span>
+      <img id="modalImage">
+      <h2 id="modalTitle"></h2>
+      <p id="modalLikes"></p>
+    </div>
+  </div>
+
+  <!-- 自己紹介文変更モーダル -->
+  <div id="bioModal" class="image-modal">
+    <div class="image-modal-content" style="max-width:500px;">
+      <h2>自己紹介を編集</h2>
+      <textarea id="bioInput" maxlength="150" rows="4"
+        style="width:100%;"></textarea>
+
+      <p id="charCount">0 / 150</p>
+
+      <button id="saveBio">完了</button>
+      <button id="cancelBio">キャンセル</button>
+    </div>
+  </div>
+
+  <div class="bg-wrapper">
+    <div class="bg-scroll"></div>
+  </div>
+
+
+  <script>
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImage");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalLikes = document.getElementById("modalLikes");
+
+    document.querySelectorAll(".post-img").forEach(img => {
+
+      img.addEventListener("click", function() {
+
+        modalImg.src = this.src;
+        modalTitle.textContent = this.dataset.title;
+        modalLikes.textContent = "❤️ " + this.dataset.likes;
+
+        modal.classList.add("active");
+
+      });
+
+    });
+
+    function closeModal() {
+      modal.classList.remove("active");
+    }
+
+    // 背景クリックで閉じる
+    modal.addEventListener("click", function(e) {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+
+
+    // 自己紹介編集
+    const bioText = document.getElementById("bioText");
+    const bioModal = document.getElementById("bioModal");
+    const bioInput = document.getElementById("bioInput");
+    const saveBio = document.getElementById("saveBio");
+    const cancelBio = document.getElementById("cancelBio");
+    const charCount = document.getElementById("charCount");
+
+    const LIMIT = 25;  // ← 表示制限文字数
+
+
+    // 省略表示処理
+    function displayBio(fullText) {
+
+      if (!fullText || fullText.trim() === "") {
+        bioText.textContent = "自己紹介はまだありません";
+        bioText.dataset.full = "";
+        return;
+      }
+
+      if (fullText.length > LIMIT) {
+        bioText.textContent = fullText.slice(0, LIMIT) + "...";
+      } else {
+        bioText.textContent = fullText;
+      }
+
+      // 常に全文保存
+      bioText.dataset.full = fullText;
+    }
+
+
+    // ページ読み込み時に整形
+    document.addEventListener("DOMContentLoaded", function() {
+
+      const initialBio = bioText.dataset.full || "";
+      displayBio(initialBio);
+
+    });
+
+
+    // モーダルを開く
+      bioText.addEventListener("click", function() {
+
+        const fullBio = bioText.dataset.full || "";
+
+        bioInput.value = fullBio;
+        charCount.textContent = bioInput.value.length + " / 150";
+
+        bioModal.classList.add("active");
+      });
+
+
+    // 文字数カウント
+    bioInput.addEventListener("input", function() {
+      charCount.textContent = bioInput.value.length + " / 150";
+    });
+
+
+    // 保存処理
+    saveBio.addEventListener("click", function() {
+
+      fetch("/mobile/update_bio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bio: bioInput.value })
+      })
+      .then(res => res.json())
+      .then(data => {
+
+        if (data.success) {
+
+          displayBio(data.bio); 
+
+          bioModal.classList.remove("active");
+        }
+
+      });
+
+    });
+    // キャンセル
+    cancelBio.addEventListener("click", function() {
+      bioModal.classList.remove("active");
+    });
+
+    //アイコン画像のアップロード
+    const iconUpload = document.getElementById("iconUpload");
+    const userIcon = document.getElementById("userIcon");
+
+    if (iconUpload) {
+
+      iconUpload.addEventListener("change", function() {
+
+        const formData = new FormData();
+        formData.append("icon", this.files[0]);
+
+        fetch("/mobile/update_icon", {
+          method: "POST",
+          body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+
+          if (data.success) {
+            userIcon.src = "/static/" + data.icon_path;
+          }
+
+        });
+
+      });
+
+    }
+
+    //フォロー用AJAX処理
+    const followBtn = document.getElementById("followBtn");
+
+    if (followBtn) {
+      followBtn.addEventListener("click", function() {
+
+        const targetId = this.dataset.userId;
+
+        fetch(`/toggle_follow/${targetId}`, {
+          method: "POST"
+        })
+        .then(res => res.json())
+        .then(data => {
+
+          if (data.error) {
+            alert("ログインしてください");
+            return;
+          }
+
+          this.textContent = data.following
+            ? "フォロー中"
+            : "フォロー";
+
+          // フォロワー数更新
+          document.getElementById("followerToggle").textContent =
+            data.follower_count;
+        });
+
+      });
+    }
+
+    // フォロー・フォロワー一覧表示
+    const followToggle = document.getElementById("followToggle");
+    const followerToggle = document.getElementById("followerToggle");
+
+    const followsDropdown = document.getElementById("followsDropdown");
+    const followersDropdown = document.getElementById("followersDropdown");
+
+    function loadList(url, dropdown) {
+
+      fetch(url)
+      .then(res => res.json())
+      .then(data => {
+
+        dropdown.innerHTML = "";
+
+        if (data.length === 0) {
+          dropdown.innerHTML = "<p>ユーザーがいません</p>";
+        } else {
+          data.forEach(user => {
+            const div = document.createElement("div");
+            div.classList.add("follow-user");
+            div.textContent = user.user_id;
+
+            div.addEventListener("click", function() {
+              // user.user_id is the username string expected by the /user/<user_id> route
+              window.location.href = "/user/" + encodeURIComponent(user.user_id);
+            });
+
+            dropdown.appendChild(div);
+          });
+        }
+
+        dropdown.style.display =
+          dropdown.style.display === "block" ? "none" : "block";
+      });
+    }
+
+    // フォロー
+    followToggle.addEventListener("click", function() {
+      loadList("/get_follows/{{ user.id }}", followsDropdown);
+    });
+
+    // フォロワー
+    followerToggle.addEventListener("click", function() {
+      loadList("/get_followers/{{ user.id }}", followersDropdown);
+    });
+
+    // 外クリックで閉じる（フォロー一覧・フォロワー一覧それぞれをチェック）
+    document.addEventListener("click", function(e) {
+      if (followsDropdown && !followsDropdown.contains(e.target)) {
+        followsDropdown.style.display = "none";
+      }
+      if (followersDropdown && !followersDropdown.contains(e.target)) {
+        followersDropdown.style.display = "none";
+      }
+    });
+
+
+
+  </script>
+
+  </body>
+</html>
